@@ -1,0 +1,27 @@
+name: "Label PR"
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  # write permission is required to create a github release
+  contents: write
+  # write permission is required for autolabeler
+  # otherwise, read permission is required at least
+  pull-requests: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.2.0
+      - uses: actions/labeler@v5.0.0
+        with:
+          configuration-path: .github/labeler.yml

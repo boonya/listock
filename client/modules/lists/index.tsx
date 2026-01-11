@@ -1,0 +1,55 @@
+import AddIcon from '@mui/icons-material/Add';
+import {Box, Button} from '@mui/material';
+import {useLiveQuery} from 'dexie-react-hooks';
+import ListCard from '@/components/lists/list-card';
+import MasonryContainer from '@/components/lists/masonry-container';
+import {getListsStorage} from '@/providers/storage/lists';
+import {notifyError} from '@/utils/notify';
+
+export default function ListOfListsScreen() {
+  const {listing, create, remove} = getListsStorage();
+  const lists = useLiveQuery(listing) ?? [];
+
+  const createList = () => {
+    create().catch((error) => {
+      notifyError(error, 'Не вдалося створити список.');
+    });
+  };
+
+  const removeList = (id: number) => {
+    remove([id]).catch((error) => {
+      notifyError(error, 'Не вдалося видалити список.');
+    });
+  };
+
+  return (
+    <Box
+      sx={{
+        p: 2,
+        margin: '0 auto',
+        maxWidth: 1200,
+        display: 'flex',
+        flexDirection: 'column',
+        flexWrap: 'nowrap',
+        alignItems: 'flex-start',
+        alignContent: 'center',
+        gap: 2,
+      }}
+    >
+      <Button onClick={createList} startIcon={<AddIcon />} variant="outlined">
+        Новий список
+      </Button>
+      <MasonryContainer>
+        {lists.map(({id, title /**, items */}) => (
+          <ListCard
+            key={id}
+            id={id}
+            title={title}
+            items={[] /** items */}
+            onRemove={removeList}
+          />
+        ))}
+      </MasonryContainer>
+    </Box>
+  );
+}

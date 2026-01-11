@@ -1,0 +1,27 @@
+name: Verification 👮🏽‍♂️
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  biome:
+    uses: ./.github/workflows/biome.yml
+    secrets: inherit
+
+  tsc:
+    uses: ./.github/workflows/tsc.yml
+    secrets: inherit
+
+  testing:
+    uses: ./.github/workflows/testing.yml
+    secrets: inherit

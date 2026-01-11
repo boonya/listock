@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "moduleResolution": "node16",
+    "module": "node16",
+    "target": "es2023",
+    "lib": ["es2024"]
+  }
+}

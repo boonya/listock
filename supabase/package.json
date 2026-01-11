@@ -1,0 +1,18 @@
+{
+  "name": "@listock/supabase",
+  "scripts": {
+    "dev": "source .env.local && supabase start",
+    "gen:types": "supabase gen types typescript --local > database.d.ts",
+    "reset": "supabase db reset",
+    "diff": "PGSSLMODE=disable supabase db diff -f",
+    "migration:up": "supabase migration up",
+    "save:seed": "supabase db dump --db-url postgresql://postgres:postgres@127.0.0.1:54322/postgres --data-only -f supabase/seed.sql",
+    "backup:data:local": "supabase db dump --local --data-only --file supabase/local-data.$(date +\"%Y%m%d%H%M%S\").backup.sql",
+    "backup:data:linked": "supabase db dump --linked --data-only --file supabase/linked-data.$(date +\"%Y%m%d%H%M%S\").backup.sql",
+    "backup:schema:local": "supabase db dump --local --file supabase/local-schema.$(date +\"%Y%m%d%H%M%S\").backup.sql",
+    "backup:schema:linked": "supabase db dump --linked --file supabase/linked-schema.$(date +\"%Y%m%d%H%M%S\").backup.sql"
+  },
+  "dependencies": {
+    "supabase": "^2.72.4"
+  }
+}

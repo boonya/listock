@@ -1,0 +1,78 @@
+# Read more https://github.com/actions/labeler
+
+root:
+  - changed-files:
+      - any-glob-to-any-file: "*"
+
+github:
+  - changed-files:
+      - any-glob-to-any-file: ".github/**"
+
+docker:
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".dockerignore"
+          - "Dockerfile"
+
+vscode:
+  - changed-files:
+      - any-glob-to-any-file: ".vscode/**"
+
+md:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - "**/*.mdx"
+
+eslint:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "eslint/**"
+          - "**/.eslintrc.js"
+
+"d.ts":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.d.ts"
+
+app:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "app/**"
+
+api:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "api/**"
+
+public:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "public/**"
+
+locales:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "public/locales/**"
+
+styles:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "postcss.config.js"
+          - "tailwind.config.ts"
+          - "**/*.css"
+
+stories:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "storybook/**"
+          - "**/*.stories.tsx"
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "tests/**"
+          - "**/*.test.tsx"
+          - "**/*.test.ts"
+          - "**/*.spec.tsx"
+          - "**/*.spec.ts"

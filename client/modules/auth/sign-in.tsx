@@ -1,0 +1,71 @@
+import {Button, Stack, TextField} from '@mui/material';
+import {useNavigate} from '@tanstack/react-router';
+import {toast} from 'sonner';
+import {signInRoute} from '@/modules/auth/auth.routes';
+import {getAPIClient} from '@/providers/api-client';
+import {setSession} from '@/providers/auth/session';
+import {queryClient} from '@/providers/query-client';
+import {sessionQueries} from '@/providers/query-client/session';
+import {notifyError} from '@/utils/notify';
+
+const api_client = getAPIClient();
+
+export default function SignIn() {
+  const {redirect_to} = signInRoute.useSearch();
+  const navigate = useNavigate();
+
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    try {
+      e.preventDefault();
+      const form = e.target as HTMLFormElement;
+      const formData = new FormData(form);
+      const email = formData.get('email')?.toString()!;
+      const password = formData.get('password')?.toString()!;
+      const {session} = await api_client.auth.signIn({
+        email,
+        password,
+      });
+      await setSession(session);
+      await queryClient.invalidateQueries(sessionQueries.current());
+      toast.success('Signed in successfully');
+      await navigate({to: redirect_to || '/'});
+    } catch (error) {
+      notifyError(error, 'Failed to sign in.');
+    }
+  };
+
+  return (
+    <Stack sx={{p: 2, marginInline: 'auto', maxWidth: 400}} spacing={2}>
+      <form onSubmit={onSubmit}>
+        <TextField
+          type="email"
+          slotProps={{
+            htmlInput: {
+              required: true,
+            },
+          }}
+          name="email"
+          required
+          label="Email"
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          type="password"
+          slotProps={{
+            htmlInput: {
+              required: true,
+              minLength: 6,
+            },
+          }}
+          name="password"
+          required
+          label="Password"
+          fullWidth
+          margin="normal"
+        />
+        <Button type="submit">Sign In</Button>
+      </form>
+    </Stack>
+  );
+}

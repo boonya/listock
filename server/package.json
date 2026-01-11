@@ -1,0 +1,21 @@
+{
+  "name": "@listock/server",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false --env-file=.env.local ./index.ts",
+    "tsc": "tsc --noEmit",
+    "test": "vitest --config ./vitest.config.ts"
+  },
+  "dependencies": {
+    "@orpc/server": "^1.13.2",
+    "@supabase/supabase-js": "^2.90.1",
+    "pino": "^10.1.1",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  },
+  "peerDependencies": {
+    "@listock/supabase": "*"
+  }
+}

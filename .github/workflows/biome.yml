@@ -1,0 +1,18 @@
+name: Biome 🔎
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  # Runs formatter, linter and import sorting
+  biome:
+    name: Biome 🔎
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+      - run: npm ci
+      - run: npm run check
