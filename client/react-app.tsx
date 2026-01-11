@@ -1,10 +1,9 @@
-import {RouterProvider} from '@tanstack/react-router';
 import {Suspense} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {Toaster} from 'sonner';
 import GeneralErrorMessage from '@/components/errors/general-message';
 import Progressbar from '@/components/progressbar';
-import router from '@/providers/router';
+import {RouterProvider} from '@/providers/router';
 import SyncProvider from '@/providers/sync';
 import ThemeProvider from '@/providers/theme';
 
@@ -13,7 +12,7 @@ export default function App() {
     <ThemeProvider>
       <ErrorBoundary fallback={<GeneralErrorMessage sx={{height: '100dvh'}} />}>
         <Suspense fallback={<Progressbar sx={{height: '100dvh'}} />}>
-          <RouterProvider router={router} />
+          <RouterProvider />
           <Toaster />
           <SyncProvider />
         </Suspense>

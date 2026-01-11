@@ -4,8 +4,6 @@ import {toast} from 'sonner';
 import {signInRoute} from '@/modules/auth/auth.routes';
 import {getAPIClient} from '@/providers/api-client';
 import {setSession} from '@/providers/auth/session';
-import {queryClient} from '@/providers/query-client';
-import {sessionQueries} from '@/providers/query-client/session';
 import {notifyError} from '@/utils/notify';
 
 const api_client = getAPIClient();
@@ -25,8 +23,7 @@ export default function SignIn() {
         email,
         password,
       });
-      await setSession(session);
-      await queryClient.invalidateQueries(sessionQueries.current());
+      setSession(session);
       toast.success('Signed in successfully');
       await navigate({to: redirect_to || '/'});
     } catch (error) {

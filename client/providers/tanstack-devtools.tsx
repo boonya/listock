@@ -2,8 +2,8 @@ import {TanStackDevtools} from '@tanstack/react-devtools';
 import {PacerDevtoolsPanel} from '@tanstack/react-pacer-devtools';
 import {ReactQueryDevtoolsPanel} from '@tanstack/react-query-devtools';
 import {TanStackRouterDevtoolsPanel} from '@tanstack/react-router-devtools';
-import {useLocalStorage} from '@uidotdev/usehooks';
 import {useEffect} from 'react';
+import {useSessionStorage} from 'usehooks-ts';
 
 declare global {
   interface Window {
@@ -12,7 +12,7 @@ declare global {
 }
 
 export default function DevTools() {
-  const [show, setShow] = useLocalStorage('TanStackDevtools', false);
+  const [show, setShow] = useSessionStorage('TanStackDevtools', false);
 
   useEffect(() => {
     // TODO: Take a look at this one and decide how to deal with.

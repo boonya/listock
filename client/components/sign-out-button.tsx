@@ -1,20 +1,16 @@
 import {Button} from '@mui/material';
-import {useQueryClient, useSuspenseQuery} from '@tanstack/react-query';
-import {useNavigate} from '@tanstack/react-router';
+import {useRouter} from '@tanstack/react-router';
 import {useTransition} from 'react';
-import {removeSession} from '@/providers/auth/session';
-import {sessionQueries} from '@/providers/query-client/session';
+import {useSession} from '@/providers/auth/session';
 
 export default function SignOutButton() {
-  const queryClient = useQueryClient();
-  const {data: session} = useSuspenseQuery(sessionQueries.current());
-  const navigate = useNavigate();
+  const router = useRouter();
+  const [session, {remove: removeSession}] = useSession();
 
   const signOut = async () => {
     if (confirm('Sure?')) {
-      await removeSession();
-      await queryClient.invalidateQueries(sessionQueries.current());
-      await navigate({to: '/'});
+      removeSession();
+      router.invalidate();
     }
   };
 

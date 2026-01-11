@@ -1,5 +1,4 @@
 import {Dexie, type EntityTable} from 'dexie';
-import type {Session} from '@/providers/auth/session';
 
 export type List = {
   key: number;
@@ -15,9 +14,7 @@ export type List = {
 };
 
 function getDBInstance() {
-  const db = new Dexie('listing-db') as Dexie & {
-    // TODO: [session storage] -> localStorage or cookies
-    sessions: EntityTable<Session, 'access_token'>;
+  const db = new Dexie('data') as Dexie & {
     lists: EntityTable<List, 'key'>;
   };
 

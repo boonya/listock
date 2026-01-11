@@ -1,88 +1,116 @@
-// import z from 'zod';
+import type {Session as SupabaseSession} from '@supabase/supabase-js';
+import {useLocalStorage} from 'usehooks-ts';
+import z from 'zod';
+import {logger} from '@/utils/logger';
 
-import type {Session as _Session} from '@supabase/supabase-js';
-import {getSessionStorage} from '@/providers/storage/session';
+const UserSchema = z
+  .object({
+    id: z.uuid(),
+    email: z.email().optional(),
+    phone: z.string().optional(),
+    role: z.string().optional(),
+  })
+  .loose();
 
-// const UserSchema = z
-//   .object({
-//     id: z.uuid(),
-//     email: z.email().optional(),
-//     phone: z.string().optional(),
-//     role: z.string().optional(),
-//   })
-//   .loose();
+/**
+ * node_modules/@supabase/auth-js/src/lib/types.ts
+ */
+const SessionSchema = z.object({
+  /**
+   * The oauth provider token. If present, this can be used to make external API requests to the oauth provider used.
+   */
+  provider_token: z.string().nullish().optional(),
+  /**
+   * The oauth provider refresh token. If present, this can be used to refresh the provider_token via the oauth provider's API. Not all oauth providers return a provider refresh token. If the provider_refresh_token is missing, please refer to the oauth provider's documentation for information on how to obtain the provider refresh token.
+   */
+  provider_refresh_token: z.string().nullish().optional(),
+  /**
+   * The access token jwt. It is recommended to set the JWT_EXPIRY to a shorter expiry value.
+   */
+  access_token: z.string(),
+  /**
+   * A one-time used refresh token that never expires.
+   */
+  refresh_token: z.string(),
+  /**
+   * A timestamp of when the token will expire. Returned when a login is confirmed.
+   */
+  expires_at: z.number().optional(),
+  token_type: z.literal('bearer'),
+  user: UserSchema,
+});
 
-// /**
-//  * node_modules/@supabase/auth-js/src/lib/types.ts
-//  */
-// const SessionSchema = z.object({
-//   /**
-//    * The oauth provider token. If present, this can be used to make external API requests to the oauth provider used.
-//    */
-//   provider_token: z.string().nullish().optional(),
-//   /**
-//    * The oauth provider refresh token. If present, this can be used to refresh the provider_token via the oauth provider's API. Not all oauth providers return a provider refresh token. If the provider_refresh_token is missing, please refer to the oauth provider's documentation for information on how to obtain the provider refresh token.
-//    */
-//   provider_refresh_token: z.string().nullish().optional(),
-//   /**
-//    * The access token jwt. It is recommended to set the JWT_EXPIRY to a shorter expiry value.
-//    */
-//   access_token: z.string(),
-//   /**
-//    * A one-time used refresh token that never expires.
-//    */
-//   refresh_token: z.string(),
-//   /**
-//    * The number of seconds until the token expires (since it was issued). Returned when a login is confirmed.
-//    */
-//   expires_in: z.number(),
-//   /**
-//    * A timestamp of when the token will expire. Returned when a login is confirmed.
-//    */
-//   expires_at: z.number().optional(),
-//   token_type: z.string(),
-//   user: UserSchema,
-// });
+export type Session = z.infer<typeof SessionSchema>;
 
-// export type Session = z.infer<typeof SessionSchema>;
-export type Session = _Session;
+const STORAGE_KEY = 'session';
 
-export const setSession = async (session: Session) => {
+const deserializeSession = (value: string | null | undefined) => {
   try {
-    const storage = getSessionStorage();
-    await storage.put(session);
+    const object = value && JSON.parse(value);
+    if (!object) return null;
+    return SessionSchema.parse(object);
   } catch (error) {
-    console.error('Failed to put session into a storage.', error);
+    logger.error('Failed to get session from storage.', error);
+    return null;
   }
 };
 
-export const getSession = async () => {
+const serializeSession = (session: Session | null | undefined) => {
   try {
-    const storage = getSessionStorage();
-    return storage.get();
+    const value = SessionSchema.parse(session);
+    return JSON.stringify(value);
   } catch (error) {
-    console.error('Failed to get session from storage.', error);
-    return undefined;
+    logger.error('Failed to put session into a storage.', error);
+  }
+  return '';
+};
+
+export function useSession() {
+  const [session, set, remove] = useLocalStorage(STORAGE_KEY, null, {
+    deserializer: deserializeSession,
+    serializer: serializeSession,
+  });
+
+  return [
+    session,
+    {
+      set,
+      remove,
+    },
+  ] as const;
+}
+
+export const getSession = (): Session | null => {
+  return deserializeSession(localStorage.getItem(STORAGE_KEY));
+};
+
+export const setSession = <S extends Session>(
+  session: S | null | undefined,
+) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, serializeSession(session));
+    /**
+     * @link https://github.com/juliencrn/usehooks-ts/blob/61949134144d3690fe9f521260a16c779a6d3797/packages/usehooks-ts/src/useLocalStorage/useLocalStorage.ts#L141
+     */
+    window.dispatchEvent(new StorageEvent('local-storage', {key: STORAGE_KEY}));
+  } catch (error) {
+    logger.error('Failed to put session into a storage.', error);
   }
 };
 
-export const removeSession = async () => {
+export const removeSession = () => {
   try {
-    const storage = getSessionStorage();
-    return storage.remove();
+    localStorage.removeItem(STORAGE_KEY);
+    /**
+     * @link https://github.com/juliencrn/usehooks-ts/blob/61949134144d3690fe9f521260a16c779a6d3797/packages/usehooks-ts/src/useLocalStorage/useLocalStorage.ts#L141
+     */
+    window.dispatchEvent(new StorageEvent('local-storage', {key: STORAGE_KEY}));
   } catch (error) {
-    console.error('Failed to remove session from storage.', error);
-    return undefined;
+    logger.error('Failed to remove session from storage.', error);
   }
 };
 
-export const getAccessToken = async () => {
-  const session = await getSession();
-  return session?.access_token;
-};
-
-export const isSessionExpired = async () => {
-  const session = await getSession();
+export const isSessionExpired = (session: Session | null) => {
   const expires_at = session?.expires_at;
   if (!expires_at) return true;
   return new Date(expires_at * 1000) < new Date();

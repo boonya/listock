@@ -5,6 +5,7 @@ import {ErrorBoundary} from 'react-error-boundary';
 import AppHeader from '@/components/app-header';
 import GeneralErrorMessage from '@/components/errors/general-message';
 import Progressbar from '@/components/progressbar';
+import type {Session} from '@/providers/auth/session';
 import TanStackDevtools from '@/providers/tanstack-devtools';
 
 function RootLayout() {
@@ -24,8 +25,12 @@ function RootLayout() {
 }
 
 export interface RouterContext {
-  // session: Session | null;
   queryClient: QueryClient;
+  session: {
+    get: () => Session | null;
+    set: (session: Session | null) => void;
+    remove: () => void;
+  };
 }
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
