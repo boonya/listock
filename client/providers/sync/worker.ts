@@ -1,50 +1,92 @@
+import {asyncThrottle} from '@tanstack/react-pacer';
 import * as Comlink from 'comlink';
+import {liveQuery} from 'dexie';
+import {type ApiClient, getAPIClient} from '@/providers/api/api-client';
+import {getDBInstance, type List} from '@/providers/storage/data-db';
 import {logger} from '@/utils/logger';
 
-logger.debug(['worker', 'init', 'sync'], 'Init sync manager.');
-
+// TODO: Implement truly type-safe message event
 export type SyncMessageEvent = MessageEvent<{
   scope: 'sync';
   isRunning: boolean;
 }>;
 
-let isRunning = false;
-let token: string | null = null;
+// @ts-expect-error Ok so far
+class SyncManager {
+  private db;
+  private api?: ApiClient;
+  private isRunning = false;
+  private access_token?: string;
 
-const resume = async (access_token: string) => {
-  if (isRunning) return;
-  logger.debug(['worker', 'sync'], 'Resume sync operations.', {isRunning});
-  token = access_token;
-  await start();
-};
+  public constructor() {
+    logger.debug(['worker', 'init', 'sync'], 'Init sync manager.');
 
-const suppress = async () => {
-  if (!isRunning) return;
-  logger.debug(['worker', 'sync'], 'Suppress sync operation.', {isRunning});
-  await stop();
-};
+    this.db = getDBInstance();
+    this.observeLists();
 
-const start = async () => {
-  if (isRunning || !token) return;
-  isRunning = true;
-  self.postMessage({scope: 'sync', isRunning});
-  logger.debug(['worker', 'sync'], 'Start sync operations.', {
-    access_token: token,
-  });
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-  await stop();
-};
+    logger.debug(['worker', 'init', 'sync'], 'Sync manager has initialized.');
+  }
 
-const stop = async () => {
-  if (!isRunning) return;
-  isRunning = false;
-  self.postMessage({scope: 'sync', isRunning});
-  logger.debug(['worker', 'sync'], 'Stop sync operations.');
-};
+  private observeLists() {
+    const syncLists = asyncThrottle(this.syncLists.bind(this), {
+      wait: 5000,
+      trailing: true,
+      leading: true,
+    });
 
-const manager = {start, resume, suppress, isRunning};
+    const observable = liveQuery(() => this.db.lists.toArray());
+
+    return observable.subscribe({
+      next: (lists) => syncLists(lists),
+      error: (error) => {
+        logger.error(['worker', 'sync'], 'Live query error', error);
+      },
+    });
+  }
+
+  public async resume(access_token: string) {
+    this.access_token = access_token;
+    this.api = getAPIClient(this.access_token);
+
+    if (this.isRunning) return;
+    logger.debug(['worker', 'sync'], 'Resume sync operations.', this);
+  }
+
+  public async suppress() {
+    if (!this.isRunning) return;
+    logger.debug(['worker', 'sync'], 'Suppress sync operation.', this);
+  }
+
+  public async syncLists(lists: List[]) {
+    logger.debug(['worker', 'sync'], 'Sync lists init.', {lists}, this);
+    if (!this.access_token || !this.api) {
+      logger.debug(['worker', 'sync'], 'API token missed. Sync skipped.', this);
+      return;
+    }
+
+    if (this.isRunning) return;
+
+    try {
+      this.isRunning = true;
+
+      self.postMessage({scope: 'sync', isRunning: this.isRunning});
+      logger.debug(['worker', 'sync'], 'Start sync operations.', {lists}, this);
+
+      // const to_sync = await this.api.lists.sync(lists);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    } catch (error) {
+      // biome-ignore lint/complexity/noUselessCatch: I need it here. --- IGNORE ---
+      throw error;
+    } finally {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      this.isRunning = false;
+      self.postMessage({scope: 'sync', isRunning: this.isRunning});
+    }
+  }
+}
+
+const manager = new SyncManager();
+// @ts-expect-error Ok so far
 export type SyncManager = typeof manager;
 Comlink.expose(manager);
-
-start();
-logger.debug(['worker', 'init', 'sync'], 'Run sync manager.');

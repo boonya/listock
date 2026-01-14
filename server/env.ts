@@ -1,6 +1,7 @@
 import {z} from 'zod';
 
 const EnvsSchema = z.object({
+  REVISION: z.string().trim().min(3),
   HOSTNAME: z.string().default('localhost'),
   PORT: z.coerce.number().min(1024).max(65_535).default(31_235),
   SUPABASE_URL: z.url(),

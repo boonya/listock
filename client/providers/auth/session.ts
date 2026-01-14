@@ -1,43 +1,49 @@
-import type {Session as SupabaseSession} from '@supabase/supabase-js';
-import {useMemo} from 'react';
+import {queryOptions, useQuery} from '@tanstack/react-query';
+import {useLayoutEffect, useMemo} from 'react';
 import {useLocalStorage} from 'usehooks-ts';
-import z from 'zod';
+import {z} from 'zod';
+import {getAPIClient} from '@/providers/api/api-client';
 import {logger} from '@/utils/logger';
 
-const UserSchema = z
-  .object({
-    id: z.uuid(),
-    email: z.email().optional(),
-    phone: z.string().optional(),
-    role: z.string().optional(),
-  })
-  .loose();
+const UserSchema = z.object({
+  id: z.uuid(),
+  email: z.email().optional(),
+  phone: z.string().optional(),
+  role: z.string().optional(),
+  created_at: z.string(),
+  confirmed_at: z.string(),
+  email_confirmed_at: z.string(),
+  last_sign_in_at: z.string(),
+  updated_at: z.string().optional(),
+  is_anonymous: z.boolean(),
+  user_metadata: z.object({}).loose(),
+});
 
 /**
  * node_modules/@supabase/auth-js/src/lib/types.ts
  */
 const SessionSchema = z.object({
-  /**
-   * The oauth provider token. If present, this can be used to make external API requests to the oauth provider used.
-   */
-  provider_token: z.string().nullish().optional(),
-  /**
-   * The oauth provider refresh token. If present, this can be used to refresh the provider_token via the oauth provider's API. Not all oauth providers return a provider refresh token. If the provider_refresh_token is missing, please refer to the oauth provider's documentation for information on how to obtain the provider refresh token.
-   */
-  provider_refresh_token: z.string().nullish().optional(),
+  token_type: z.literal('bearer'),
   /**
    * The access token jwt. It is recommended to set the JWT_EXPIRY to a shorter expiry value.
    */
   access_token: z.string(),
   /**
-   * A one-time used refresh token that never expires.
+   * Timestamp the token was issued.
    */
-  refresh_token: z.string(),
+  issued_at: z.number(),
   /**
    * A timestamp of when the token will expire. Returned when a login is confirmed.
    */
-  expires_at: z.number().optional(),
-  token_type: z.literal('bearer'),
+  expires_at: z.number(),
+  /**
+   * Number of seconds the token is going to be valid since it's issued.
+   */
+  ttl: z.number(),
+  /**
+   * A one-time used refresh token that never expires.
+   */
+  refresh_token: z.string(),
   user: UserSchema,
 });
 
@@ -90,9 +96,7 @@ export const getSession = (): Session | null => {
   return deserializeSession(localStorage.getItem(STORAGE_KEY));
 };
 
-export const setSession = <S extends Session>(
-  session: S | null | undefined,
-) => {
+export const setSession = (session: Session | null | undefined) => {
   try {
     localStorage.setItem(STORAGE_KEY, serializeSession(session));
     /**
@@ -129,3 +133,48 @@ export const isSessionExpired = (session: Session | null) => {
   if (!expires_at) return true;
   return new Date(expires_at * 1000) < new Date();
 };
+
+export function SessionProvider() {
+  const [session] = useSession();
+
+  const enabled = !!session;
+  const initialDataUpdatedAt = session ? session.issued_at * 1000 : undefined;
+  const refetchInterval = session ? session.ttl * 1000 : undefined;
+
+  useQuery(
+    queryOptions({
+      queryKey: ['refresh-session'],
+      queryFn: async () => {
+        const api = getAPIClient(session);
+        const new_session = await api.auth.refresh_session({
+          refresh_token: session!.refresh_token,
+        });
+        logger.debug(
+          ['auth'],
+          `New session retreived at ${new Date().toLocaleTimeString()}.`,
+          new_session,
+        );
+        setSession(new_session);
+        return new_session;
+      },
+      enabled,
+      initialData: session,
+      initialDataUpdatedAt,
+      staleTime: refetchInterval,
+      refetchInterval,
+    }),
+  );
+
+  useLayoutEffect(() => {
+    console.log(`session provider at ${new Date().toLocaleTimeString()}`, {
+      'session issued_at':
+        session?.issued_at &&
+        new Date(session.issued_at * 1000).toLocaleString(),
+      'session expires_at':
+        session?.expires_at &&
+        new Date(session.expires_at * 1000).toLocaleString(),
+    });
+  }, [session?.issued_at, session?.expires_at]);
+
+  return null;
+}

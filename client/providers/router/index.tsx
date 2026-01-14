@@ -9,7 +9,6 @@ import GeneralError from '@/components/errors/general-message';
 import Progressbar from '@/components/progressbar';
 import {signInRoute, signUpRoute} from '@/modules/auth/auth.routes';
 import listsRoutes from '@/modules/lists/lists.routes';
-import {getSession, removeSession, setSession} from '@/providers/auth/session';
 import {queryClient} from '@/providers/query-client';
 import rootRoute from '@/providers/router/root.route';
 
@@ -26,12 +25,6 @@ const routeTree = rootRoute.addChildren([
   listsRoutes,
 ]);
 
-const session = {
-  get: getSession,
-  set: setSession,
-  remove: removeSession,
-};
-
 export const router = createRouter({
   routeTree,
   defaultPendingComponent: () => <Progressbar />,
@@ -39,7 +32,6 @@ export const router = createRouter({
   defaultNotFoundComponent: () => <NotFound />,
   context: {
     queryClient,
-    session,
   },
 });
 

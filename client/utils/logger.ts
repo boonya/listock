@@ -11,7 +11,9 @@ export type ScopeValue =
   | 'worker'
   | 'auth'
   | 'storage'
-  | 'network';
+  | 'network'
+  | 'api'
+  | 'lists';
 
 export type Scope = ScopeValue | ScopeValue[] | null | undefined;
 

@@ -1,19 +1,33 @@
 import {ORPCError, os} from '@orpc/server';
+import {PostgrestError} from '@supabase/supabase-js';
 import {z} from 'zod';
 import {logger} from '@/logger.js';
 import {supabaseMiddleware} from '@/supabase-client.js';
+import {ORPCContext} from '@/types/index.js';
 import {getDbApi} from './db-api.js';
 import {sync as processSync} from './sync.js';
 
-export const listing = os.use(supabaseMiddleware).handler(async ({context}) => {
-  const db = getDbApi(context.supabase);
-  return db.select();
-  //   ...rest,
-  //   created_at: new Date(created_at),
-  // }));
-});
+const listing = os
+  .$context<ORPCContext>()
+  .use(supabaseMiddleware)
+  .handler(async ({context}) => {
+    try {
+      const db = getDbApi(context.supabase);
+      return db.select();
+      //   ...rest,
+      //   created_at: new Date(created_at),
+      // }));
+    } catch (cause) {
+      if (cause instanceof ORPCError) throw cause;
+      const error =
+        cause instanceof Error ? cause : new Error('Unknown error.', {cause});
+      throw new ORPCError('INTERNAL_SERVER_ERROR', error);
+    }
+  });
 
-export const sync = os
+const sync = os
+  .$context<ORPCContext>()
+  .use(supabaseMiddleware)
   .input(
     z
       .object({
@@ -26,8 +40,16 @@ export const sync = os
       })
       .array(),
   )
-  .use(supabaseMiddleware)
   .handler(async ({input, context}) => {
-    const db = getDbApi(context.supabase);
-    return processSync(db, input);
+    try {
+      const db = getDbApi(context.supabase);
+      return processSync(db, input);
+    } catch (cause) {
+      if (cause instanceof ORPCError) throw cause;
+      const error =
+        cause instanceof Error ? cause : new Error('Unknown error.', {cause});
+      throw new ORPCError('INTERNAL_SERVER_ERROR', error);
+    }
   });
+
+export default {listing, sync};

@@ -1,11 +1,12 @@
-import {type QueryClient, QueryClientProvider} from '@tanstack/react-query';
+import {type QueryClient} from '@tanstack/react-query';
 import {createRootRouteWithContext, Outlet} from '@tanstack/react-router';
 import {Suspense} from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import AppHeader from '@/components/app-header';
 import GeneralErrorMessage from '@/components/errors/general-message';
 import Progressbar from '@/components/progressbar';
-import type {Session} from '@/providers/auth/session';
+import {SessionProvider} from '@/providers/auth/session';
+import {QueryClientProvider} from '@/providers/query-client';
 import TanStackDevtools from '@/providers/tanstack-devtools';
 
 function RootLayout() {
@@ -17,6 +18,7 @@ function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AppHeader />
           <Outlet />
+          <SessionProvider />
           <TanStackDevtools />
         </QueryClientProvider>
       </Suspense>
@@ -26,11 +28,6 @@ function RootLayout() {
 
 export interface RouterContext {
   queryClient: QueryClient;
-  session: {
-    get: () => Session | null;
-    set: (session: Session | null) => void;
-    remove: () => void;
-  };
 }
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({

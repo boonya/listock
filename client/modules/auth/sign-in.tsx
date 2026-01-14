@@ -1,7 +1,7 @@
 import {Button, Stack, TextField} from '@mui/material';
 import {useRouter} from '@tanstack/react-router';
 import {toast} from 'sonner';
-import {getAPIClient} from '@/providers/api-client';
+import {getAPIClient} from '@/providers/api/api-client';
 import {setSession} from '@/providers/auth/session';
 import {notifyError} from '@/utils/notify';
 
@@ -17,7 +17,7 @@ export default function SignIn() {
       const formData = new FormData(form);
       const email = formData.get('email')?.toString()!;
       const password = formData.get('password')?.toString()!;
-      const {session} = await api.auth.signIn({email, password});
+      const {session} = await api.auth.sign_in({email, password});
       setSession(session);
       toast.success('Signed in successfully');
       router.invalidate();

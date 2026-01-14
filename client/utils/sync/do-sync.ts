@@ -1,4 +1,4 @@
-import {getAPIClient} from '@/providers/api-client';
+import {getAPIClient} from '@/providers/api/api-client';
 import {getDBInstance} from '@/providers/storage/data-db';
 
 export default async (access_token: string) => {
@@ -23,12 +23,14 @@ export default async (access_token: string) => {
     .filter(({id}) => !!id && existentIds.has(id))
     .map(({key, id}) => [remoteMap.get(id!)!, key] as const);
 
-  db.transaction('rw', db.lists, async () => {
-    await db.lists.bulkDelete(toBeRemoved);
-    await db.lists.bulkPut(
-      toBeUpdated.map(([values]) => values),
-      toBeUpdated.map(([, key]) => key),
-    );
-    await db.lists.bulkAdd(remote);
-  });
+  console.debug('[sync]', {toBeRemoved, toBeUpdated});
+
+  // db.transaction('rw', db.lists, async () => {
+  //   await db.lists.bulkDelete(toBeRemoved);
+  //   await db.lists.bulkPut(
+  //     toBeUpdated.map(([values]) => values),
+  //     toBeUpdated.map(([, key]) => key),
+  //   );
+  //   await db.lists.bulkAdd(remote);
+  // });
 };

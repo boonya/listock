@@ -1,23 +1,26 @@
 import {Button} from '@mui/material';
-import {useRouter} from '@tanstack/react-router';
+import {useSuspenseQuery} from '@tanstack/react-query';
 import {useTransition} from 'react';
+import {queryMe, useSignOut} from '@/modules/auth/auth.routes';
 import {useSession} from '@/providers/auth/session';
+import {notifyError} from '@/utils/notify';
 
 export default function SignOutButton() {
-  const router = useRouter();
-  const [session, {remove: removeSession}] = useSession();
+  const [session] = useSession();
+  // const {data: me} = useSuspenseQuery(queryMe(session));
 
-  const signOut = async () => {
-    if (confirm('Sure?')) {
-      removeSession();
-      router.invalidate();
-    }
-  };
+  const signOut = useSignOut({scope: 'local'});
 
   const [isPending, startTransition] = useTransition();
   const handleSignOut = () => {
-    startTransition(() => {
-      signOut();
+    startTransition(async () => {
+      if (confirm('Точно хочеш вийти?')) {
+        try {
+          await signOut();
+        } catch (error) {
+          notifyError(['auth'], error, 'Сорі. Вийти не получілось.');
+        }
+      }
     });
   };
 

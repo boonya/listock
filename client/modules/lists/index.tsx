@@ -12,13 +12,13 @@ export default function ListOfListsScreen() {
 
   const createList = () => {
     create().catch((error) => {
-      notifyError(error, 'Не вдалося створити список.');
+      notifyError(['lists'], error, 'Не вдалося створити список.');
     });
   };
 
   const removeList = (id: number) => {
     remove([id]).catch((error) => {
-      notifyError(error, 'Не вдалося видалити список.');
+      notifyError(['lists'], error, 'Не вдалося видалити список.');
     });
   };
 

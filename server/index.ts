@@ -22,7 +22,7 @@ const handler = new RPCHandler(router, {
 const server = createServer(async (req, res) => {
   const result = await handler.handle(req, res, {
     context: {
-      jwt: req?.headers.authorization || undefined,
+      jwt: req?.headers.authorization?.split(' ').splice(-1)[0] || undefined,
     },
   });
 
