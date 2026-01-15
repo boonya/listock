@@ -1,5 +1,5 @@
 import AddIcon from '@mui/icons-material/Add';
-import {Box, Button} from '@mui/material';
+import {Box, Button, Stack} from '@mui/material';
 import {useLiveQuery} from 'dexie-react-hooks';
 import ListCard from '@/components/lists/list-card';
 import MasonryContainer from '@/components/lists/masonry-container';
@@ -39,7 +39,8 @@ export default function ListOfListsScreen() {
       <Button onClick={createList} startIcon={<AddIcon />} variant="outlined">
         Новий список
       </Button>
-      <MasonryContainer>
+      <Box sx={{display: 'inline-flex', gap: 2, flexWrap: 'wrap'}}>
+        {/* <MasonryContainer> */}
         {lists.map(({id, title /**, items */}) => (
           <ListCard
             key={id}
@@ -49,7 +50,8 @@ export default function ListOfListsScreen() {
             onRemove={removeList}
           />
         ))}
-      </MasonryContainer>
+      </Box>
+      {/* </MasonryContainer> */}
     </Box>
   );
 }

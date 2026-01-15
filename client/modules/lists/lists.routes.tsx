@@ -1,7 +1,7 @@
 import {createRoute} from '@tanstack/react-router';
 import {authOnlyRoute} from '@/modules/auth/auth.routes';
-// import ListItems from '@/modules/list-items';
-import Lists from '@/modules/lists';
+import List from '@/modules/lists/list';
+import Listing from '@/modules/lists/listing';
 import {queryListing} from '@/providers/api/lists';
 import rootRoute from '@/providers/router/root.route';
 import {logger} from '@/utils/logger';
@@ -22,13 +22,13 @@ export const root = createRoute({
 export const lists = createRoute({
   path: '/',
   getParentRoute: () => root,
-  component: Lists,
+  component: Listing,
 });
 
-// export const list = createRoute({
-//   path: '/$id',
-//   getParentRoute: () => root,
-//   component: ListItems,
-// });
+export const list = createRoute({
+  path: '/$id',
+  getParentRoute: () => root,
+  component: List,
+});
 
-export default root.addChildren([lists /**, list */]);
+export default root.addChildren([lists, list]);

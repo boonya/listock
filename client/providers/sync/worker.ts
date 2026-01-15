@@ -73,7 +73,7 @@ class SyncManager {
       logger.debug(['worker', 'sync'], 'Start sync operations.', {lists}, this);
 
       // const to_sync = await this.api.lists.sync(lists);
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      // await new Promise((resolve) => setTimeout(resolve, 5000));
     } catch (error) {
       // biome-ignore lint/complexity/noUselessCatch: I need it here. --- IGNORE ---
       throw error;
