@@ -1,0 +1,31 @@
+name: Build check 🔎
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+      - run: npm ci
+      - run: |
+          REVISION=${{ github.sha }} \
+          API_URL=http://api-server \
+          npm run build:client
+
+  server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+      - run: npm ci
+      - run: |
+          REVISION=${{ github.sha }} \
+          npm run build:server

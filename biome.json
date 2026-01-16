@@ -3,10 +3,10 @@
   "vcs": {
     "enabled": false,
     "clientKind": "git",
-    "useIgnoreFile": false
+    "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": false
+    "ignoreUnknown": true
   },
   "formatter": {
     "enabled": true,
@@ -24,7 +24,7 @@
       "**",
       "!**/node_modules/**",
       "!client/dev-dist/**",
-      "!client/dist/**",
+      "!**/build/**",
       "!**/coverage/**",
       "!msw/public/mockServiceWorker.js",
       "!**/storybook-static/**",
@@ -61,13 +61,12 @@
     },
     "includes": [
       "**",
-      "!__.*",
       "!**/node_modules/**",
       "!client/dev-dist/**",
-      "!client/dist/**",
+      "!**/build/**",
       "!**/coverage/**",
       "!msw/public/mockServiceWorker.js",
-      "!storybook-static/**",
+      "!**/storybook-static/**",
       "!supabase/database.d.ts"
     ]
   },
