@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    "composite": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
@@ -8,5 +9,6 @@
     "outDir": "build",
     "target": "es2023",
     "lib": ["es2024"]
-  }
+  },
+  "include": ["./package.json", "**/*.ts"]
 }

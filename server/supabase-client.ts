@@ -4,6 +4,7 @@ import {createClient, PostgrestError} from '@supabase/supabase-js';
 import getEnvs from '@/env';
 import {logger} from '@/logger';
 import pkg from '@/package.json';
+
 import type {ORPCContext} from '@/types/orpc';
 
 type Options = Parameters<typeof createClient>[2];

@@ -6,6 +6,8 @@
     "dev": "vite dev",
     "build": "vite build",
     "types": "tsc --noEmit",
+    "pretypes": "npm run build -w @listock/server",
+    "posttypes": "rm -rf ../server/build",
     "test": "vitest --config ./vitest.config.ts"
   },
   "dependencies": {
