@@ -18,8 +18,8 @@ jobs:
     uses: ./.github/workflows/biome.yml
     secrets: inherit
 
-  tsc:
-    uses: ./.github/workflows/tsc.yml
+  types:
+    uses: ./.github/workflows/types.yml
     secrets: inherit
 
   testing:

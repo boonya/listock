@@ -13,7 +13,8 @@ jobs:
         with:
           node-version-file: ".nvmrc"
       - run: npm ci
-      - run: npm run tsc:client
+      - run: npm run types:client
+
   server:
     runs-on: ubuntu-latest
     steps:
@@ -22,4 +23,4 @@ jobs:
         with:
           node-version-file: ".nvmrc"
       - run: npm ci
-      - run: npm run tsc:server
+      - run: npm run types:server
