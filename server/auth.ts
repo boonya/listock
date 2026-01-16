@@ -1,7 +1,7 @@
 import {ORPCError, os} from '@orpc/server';
 import {z} from 'zod';
-import createSupabaseClient, {supabaseMiddleware} from './supabase-client';
-import {type ORPCContext} from './types';
+import createSupabaseClient, {supabaseMiddleware} from '@/supabase-client';
+import type {ORPCContext} from '@/types/orpc';
 
 const UserSchema = z.object({
   id: z.uuid(),
@@ -97,12 +97,10 @@ const signOut = os
 
 const me = os
   .$context<ORPCContext>()
-  // .use(supabaseMiddleware)
   .route({method: 'GET'})
   .handler(async ({context}) => {
     try {
       const supabase = createSupabaseClient();
-      // const {data, error} = await context.supabase.auth.getUser();
       const {data, error} = await supabase.auth.getUser(context.jwt);
       if (error) {
         throw new ORPCError(error.name, error);
