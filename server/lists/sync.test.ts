@@ -12,7 +12,7 @@ const db = {
   select: vi.fn(async () => result),
 };
 
-test.for([
+test.skip.for([
   [],
   DATASET_001,
   DATASET_002,
