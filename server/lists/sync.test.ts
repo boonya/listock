@@ -1,7 +1,7 @@
 import {expect, test, vi} from 'vitest';
 import DATASET_001 from './__data__/001.json';
 import DATASET_002 from './__data__/001.json';
-import {sync} from './sync.js';
+import {sync} from './sync';
 
 const result: never[] = [];
 

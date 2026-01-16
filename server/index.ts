@@ -2,9 +2,9 @@ import {createServer} from 'node:http';
 import {onError} from '@orpc/server';
 import {RPCHandler} from '@orpc/server/node';
 import {CORSPlugin, RequestHeadersPlugin} from '@orpc/server/plugins';
-import getEnvs from '@/env.js';
-import {logger} from '@/logger.js';
-import {router} from '@/router.js';
+import getEnvs from '@/env';
+import {logger} from '@/logger';
+import {router} from '@/router';
 
 logger.info('Server starting...');
 

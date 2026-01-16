@@ -1,4 +1,4 @@
-import type {SupabaseClient} from '@/supabase-client.js';
+import type {SupabaseClient} from '@/supabase-client';
 
 type Remove = {
   id: string;

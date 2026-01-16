@@ -5,8 +5,9 @@
     "paths": {
       "@/*": ["./*"]
     },
-    "moduleResolution": "node16",
-    "module": "node16",
+    "outDir": "build",
+    "moduleResolution": "bundler",
+    "module": "esnext",
     "target": "es2023",
     "lib": ["es2024"]
   }

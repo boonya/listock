@@ -1,11 +1,9 @@
 import {ORPCError, os} from '@orpc/server';
-import {PostgrestError} from '@supabase/supabase-js';
 import {z} from 'zod';
-import {logger} from '@/logger.js';
-import {supabaseMiddleware} from '@/supabase-client.js';
-import {ORPCContext} from '@/types/index.js';
-import {getDbApi} from './db-api.js';
-import {sync as processSync} from './sync.js';
+import {supabaseMiddleware} from '@/supabase-client';
+import {ORPCContext} from '@/types';
+import {getDbApi} from './db-api';
+import {sync as processSync} from './sync';
 
 const listing = os
   .$context<ORPCContext>()

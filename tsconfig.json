@@ -6,5 +6,6 @@
     "strictNullChecks": true,
     "skipLibCheck": true,
     "esModuleInterop": true
-  }
+  },
+  "exclude": ["*.test.tsx?"]
 }
