@@ -2,7 +2,6 @@
 interface Input {
   id: string | null;
   title: string;
-  // items: z.object({}).loose().array().nullish(),
   created_at: Date;
   updated_at: Date | null;
   deleted_at: Date | null;
@@ -43,16 +42,18 @@ export default async function sync(db: Db, input: Input[]) {
       deleted_at: deleted_at!,
     }));
 
-  const create = input
-    .filter(({id, deleted_at}) => !id && !deleted_at)
-    .map(({id, deleted_at, ...rest}) => rest);
-
   const update = input
     .filter(({id, deleted_at}) => id && !deleted_at)
     .map(({id, deleted_at, ...rest}) => ({
       id: id!,
       ...rest,
     }));
+
+  const create = input
+    .filter(({id, deleted_at}) => !id && !deleted_at)
+    .map(({id, deleted_at, ...rest}) => rest);
+
+  console.log({input, remove, update, create});
 
   await Promise.all([db.remove(remove), db.update(update), db.create(create)]);
   return db.select();

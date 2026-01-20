@@ -8,6 +8,9 @@ const RemoveInput = z.object({
 
 type Remove = z.input<typeof RemoveInput>;
 
+/**
+ * Delete only items that updated before they marked as deleted.
+ */
 async function remove(supabase: SupabaseClient, input: Remove[]) {
   const items = RemoveInput.array().parse(input);
   await supabase.rpc('delete_outdated_lists', {items});

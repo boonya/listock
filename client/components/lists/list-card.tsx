@@ -14,7 +14,7 @@ import {createLink} from '@tanstack/react-router';
 import type React from 'react';
 
 export type Props = {
-  id: number;
+  id: ID;
   title: string;
   items: {
     id: string;
@@ -22,7 +22,7 @@ export type Props = {
     price: number | null;
     currency: string;
   }[];
-  onRemove: (id: number) => unknown;
+  onRemove: (id: ID) => unknown;
 };
 
 const CardActionAreaLink = createLink((props: CardActionAreaProps) => (

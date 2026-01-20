@@ -15,7 +15,7 @@ export default function ListOfListsScreen() {
     });
   };
 
-  const removeList = (id: number) => {
+  const removeList = (id: ID) => {
     remove([id]).catch((error) => {
       notifyError(['lists'], error, 'Не вдалося видалити список.');
     });

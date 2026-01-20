@@ -1,6 +1,7 @@
 import {asyncThrottle} from '@tanstack/react-pacer';
 import * as Comlink from 'comlink';
 import {liveQuery} from 'dexie';
+import {isEqual} from 'date-fns';
 import {type ApiClient, getAPIClient} from '@/providers/api/api-client';
 import {getDBInstance, type List} from '@/providers/storage/data-db';
 import {logger} from '@/utils/logger';
@@ -77,14 +78,68 @@ class SyncManager {
       self.postMessage({scope: 'sync', isRunning: this.isRunning});
       logger.debug(['worker', 'sync'], 'Start sync operations.', {lists}, this);
 
-      // const to_sync = await this.api.lists.sync(lists);
-      // await new Promise((resolve) => setTimeout(resolve, 5000));
+      const toSync = lists.map(({id, ...rest}) => ({
+        id: typeof id === 'number' ? null : id,
+        ...rest,
+      }));
+      const synced = await this.api.lists.sync(toSync);
+
+      const local = new Map(lists.map((i) => [i.id, i]));
+      const remote = new Map(synced.map((i) => [i.id, i]));
+
+      const remove = [
+        ...new Set(local.keys()).difference(new Set(remote.keys())).values(),
+      ];
+
+      const create: List[] = [];
+      for (const [id, item] of remote) {
+        if (local.has(id)) continue;
+        create.push(item);
+      }
+
+      type Changes = Partial<Omit<List, 'id'>>;
+      const update: {key: ID; changes: Changes}[] = [];
+      for (const [id, item] of remote) {
+        const localItem = local.get(id);
+        if (!localItem) continue;
+
+        let changes: Changes | undefined;
+        if (item.title !== localItem.title) {
+          if (!changes) changes = {};
+          changes.title = item.title;
+        }
+        if (!isEqual(item.created_at, localItem.created_at)) {
+          if (!changes) changes = {};
+          changes.created_at = item.created_at;
+        }
+        if (!isEqual(item.updated_at || 0, localItem.updated_at || 0)) {
+          if (!changes) changes = {};
+          changes.updated_at = item.updated_at;
+        }
+
+        if (!changes) continue;
+
+        update.push({key: id, changes});
+      }
+
+      console.log({local, remote, remove, create, update});
+
+      await this.db.transaction('rw', this.db.lists, async () => {
+        return Promise.all([
+          this.db.lists.bulkDelete(remove),
+          this.db.lists.bulkAdd(create),
+          this.db.lists.bulkUpdate(update),
+        ]);
+      });
+
+      logger.debug(['worker', 'sync'], 'Sync operations has finished.', {
+        synced,
+      });
     } catch (error) {
       // biome-ignore lint/complexity/noUselessCatch: I need it here. --- IGNORE ---
+      logger.debug(['worker', 'sync'], 'Sync operations has failed.', error);
       throw error;
     } finally {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
       this.isRunning = false;
       self.postMessage({scope: 'sync', isRunning: this.isRunning});
     }
