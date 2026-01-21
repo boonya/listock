@@ -11,11 +11,12 @@ export default os
   .input(
     z
       .object({
-        id: z.uuid().nullish().default(null),
+        id: z.uuid().or(z.number()),
         created_at: z.date(),
         updated_at: z.date().nullish().default(null),
         deleted_at: z.date().nullish().default(null),
         title: z.string(),
+        // order: z.number().nullish().default(null),
         // items: z.object({}).loose().array().nullish(),
       })
       .array(),
