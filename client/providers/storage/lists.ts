@@ -10,33 +10,26 @@ export function getListsStorage() {
   const listing = async () => {
     const list = await db.lists.filter(({deleted_at}) => !deleted_at).toArray();
 
-    const sorted_by_created_at = list.toSorted((a, b) => {
-      const left = a.created_at.getTime();
-      const right = b.created_at.getTime();
+    // order by "order" asc nulls first, "created_at" desc
+    return list.toSorted((a, b) => {
+      const aHasOrder = a.order !== null && a.order !== undefined;
+      const bHasOrder = b.order !== null && b.order !== undefined;
 
-      if (left > right) {
-        return -1;
+      if (!aHasOrder && !bHasOrder) {
+        // both missing order -> newest first
+        return b.created_at.getTime() - a.created_at.getTime();
       }
-      if (left < right) {
-        return 1;
-      }
-      return 0;
+      if (!aHasOrder && bHasOrder) return -1;
+      if (aHasOrder && !bHasOrder) return 1;
+
+      // both have order -> sort by order asc
+      const ao = a.order as number;
+      const bo = b.order as number;
+      if (ao !== bo) return ao - bo;
+
+      // equal order -> newest created_at first
+      return b.created_at.getTime() - a.created_at.getTime();
     });
-
-    const sorted_by_order = sorted_by_created_at.toSorted((a, b) => {
-      const left = a.order ?? 0;
-      const right = b.order ?? 0;
-
-      if (left > right) {
-        return 1;
-      }
-      if (left < right) {
-        return -1;
-      }
-      return 0;
-    });
-
-    return sorted_by_order;
   };
 
   const create = async (title = '') => {
