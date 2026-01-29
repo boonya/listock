@@ -1,38 +1,58 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
-import {defineConfig, loadEnv} from 'vite';
+import {type CommonServerOptions, defineConfig, loadEnv} from 'vite';
 import {VitePWA} from 'vite-plugin-pwa';
 import tsConfigPaths from 'vite-tsconfig-paths';
 import z from 'zod';
 import {background_color, theme_color} from './providers/theme/theme';
 
-const EnvSchema = z.object({
+const ModeSchema = z.enum(['production', 'development']);
+
+const BuildEnvVars = z.object({
   APP_LANG: z.string().length(2),
   NAME: z.string().min(3),
   DESCRIPTION: z.string().min(10),
   REVISION: z.string().min(1),
-  API_URL: z.url(), // TODO: Runtime only
-  DEVSERVER_HOSTNAME: z.string().default('localhost'), // TODO: Runtime only
-  DEVSERVER_PORT: z.coerce.number().min(1024).max(65_535).default(31_234), // TODO: Runtime only
 });
 
-export default defineConfig(({mode}) => {
+const RuntimeEnvVars = z.object({
+  API_URL: z.url().endsWith('/'),
+});
+
+const DevEnvVars = z.object({
+  DEVSERVER_HOSTNAME: z.string().default('localhost'),
+  DEVSERVER_PORT: z.coerce.number().min(1024).max(65_535).default(31_234),
+});
+
+export default defineConfig((config) => {
+  const mode = ModeSchema.parse(config.mode);
   const env = loadEnv(mode, process.cwd(), '');
-  const {
-    APP_LANG,
-    NAME,
-    DESCRIPTION,
-    REVISION,
-    API_URL,
-    DEVSERVER_PORT,
-    DEVSERVER_HOSTNAME,
-  } = EnvSchema.parse(env);
+
+  const {APP_LANG, NAME, DESCRIPTION, REVISION} = BuildEnvVars.parse(env);
+
+  const {API_URL} = mode === 'production' ? {} : RuntimeEnvVars.parse(env);
+
+  const {DEVSERVER_PORT, DEVSERVER_HOSTNAME} =
+    mode === 'development' ? DevEnvVars.parse(env) : {};
+
+  let httpsServer: CommonServerOptions['https'];
+  try {
+    if (mode === 'development') {
+      const key = fs.readFileSync(
+        path.resolve(__dirname, './localhost-key.pem'),
+      );
+      const cert = fs.readFileSync(path.resolve(__dirname, './localhost.pem'));
+      httpsServer = {key, cert};
+    }
+  } catch (error) {
+    // biome-ignore lint/suspicious/noConsole: This is what I wanted to achieve
+    console.warn('https is not available.', error);
+  }
 
   return {
     define: {
       REVISION: JSON.stringify(REVISION),
-      API_URL: JSON.stringify(API_URL),
     },
     resolve: {
       alias: {
@@ -45,21 +65,16 @@ export default defineConfig(({mode}) => {
     server: {
       open: true,
       port: DEVSERVER_PORT,
-      https: {
-        key: fs.readFileSync(path.resolve(__dirname, './localhost-key.pem')),
-        cert: fs.readFileSync(path.resolve(__dirname, './localhost.pem')),
-      },
-      // Make sure the server is accessible over the local network
       host: DEVSERVER_HOSTNAME,
+      https: httpsServer,
     },
     plugins: [
       {
         name: 'transform-index.html',
         transformIndexHtml(html) {
-          return html.replace(
-            /<title>(.*?)<\/title>/,
-            `<title>${NAME}</title>`,
-          );
+          return html
+            .replace(/<title>(.*?)<\/title>/, `<title>${NAME}</title>`)
+            .replaceAll('%API_URL%', API_URL ?? '%API_URL%');
         },
       },
       tsConfigPaths(),

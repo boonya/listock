@@ -14,7 +14,7 @@ cp .env.sample .env.local`
 
 ```sh
 REVISION=$(date '+%Y.%m.%d-%H.%M.%S')
-docker build --build-arg NEXT_PUBLIC_REVISION=${REVISION} -t boonya/listock:${REVISION} -t boonya/listock:latest .
+docker build --build-arg REVISION=${REVISION} -t boonya/listock:${REVISION} -t boonya/listock:latest .
 ```
 
 ### Run

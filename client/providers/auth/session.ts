@@ -138,7 +138,7 @@ export const queryRefreshSession = (session: Session) => {
   return queryOptions({
     queryKey: ['refresh-session'],
     queryFn: async () => {
-      const api = getAPIClient(session);
+      const api = getAPIClient(API_URL, session);
       return api.user.refresh_session(session);
     },
     placeholderData: keepPreviousData,

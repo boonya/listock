@@ -1,6 +1,7 @@
 import {throttle} from '@tanstack/react-pacer';
 import {useEffect, useState} from 'react';
-import {syncManagerWorker} from '@/providers/sync';
+
+// import {syncManagerWorker} from '@/providers/sync';
 
 type OnChange = (isSyncing: boolean) => unknown;
 
@@ -14,15 +15,15 @@ export function useSyncStatusEvents(onChange: OnChange) {
       trailing: true,
     });
 
-    // TODO: Make truly type-safe messages
-    syncManagerWorker.addEventListener(
-      'message',
-      (event) => {
-        if (event.data.scope !== 'sync') return;
-        throttledHandler(event.data.isRunning);
-      },
-      {signal: controller.signal},
-    );
+    // // TODO: Make truly type-safe messages
+    // syncManagerWorker.addEventListener(
+    //   'message',
+    //   (event) => {
+    //     if (event.data.scope !== 'sync') return;
+    //     throttledHandler(event.data.isRunning);
+    //   },
+    //   {signal: controller.signal},
+    // );
 
     return () => {
       controller.abort();

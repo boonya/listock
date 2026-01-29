@@ -7,11 +7,13 @@ import {logger} from '@/utils/logger';
 
 export class SyncManager {
   private db;
+  private API_URL: string;
   private subscriptions?: Subscription[];
 
-  public constructor() {
+  public constructor(API_URL: string) {
     logger.debug(['worker', 'init', 'sync'], 'Init sync manager.');
 
+    this.API_URL = API_URL;
     this.db = getDBInstance();
 
     logger.debug(['worker', 'init', 'sync'], 'Sync manager has initialized.');
@@ -20,7 +22,7 @@ export class SyncManager {
   public async run(session: {access_token: string; token_type?: string}) {
     logger.debug(['worker', 'sync'], 'Run sync.', this);
 
-    const api = getAPIClient(session);
+    const api = getAPIClient(this.API_URL, session);
 
     this.subscriptions = [await this.observe_lists(api)];
 
@@ -120,4 +122,4 @@ export class SyncManager {
   }
 }
 
-Comlink.expose(new SyncManager(), self);
+Comlink.expose(SyncManager);

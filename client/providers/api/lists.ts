@@ -7,7 +7,7 @@ export const queryListing = () =>
     queryKey: ['listing'],
     queryFn: async () => {
       const session = getSession();
-      const api = getAPIClient(session);
+      const api = getAPIClient(API_URL, session);
       return api.lists.listing();
     },
     staleTime: 0,
