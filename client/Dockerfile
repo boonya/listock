@@ -5,19 +5,17 @@ FROM node AS build
 WORKDIR /app
 
 COPY . .
-RUN npm ci --workspace client --include-workspace-root
+RUN npm ci -w client --include-workspace-root
 
 ARG REVISION
 RUN npm run build -w client
 
-## Runtime
+# Runtime
 FROM nginx:stable-alpine-slim AS runner
 
-RUN rm -rf /etc/nginx/conf.d/*
-COPY client/virtualhost.conf /etc/nginx/conf.d/virtualhost.conf
 COPY --from=build /app/client/build /www/
-
-# ARG API_URL
+RUN rm -rf /etc/nginx/conf.d/*
+COPY client/nginx.conf /etc/nginx/conf.d/virtualhost.conf
 
 SHELL ["/bin/sh", "-c"]
 # if [ -z "$API_URL" ]; then exit 1
