@@ -6,7 +6,7 @@ export const queryMe = (session: Session) =>
   queryOptions({
     queryKey: ['me'],
     queryFn: () => {
-      const api = getAPIClient(session);
+      const api = getAPIClient(API_URL, session);
       return api.user.me();
     },
     placeholderData: keepPreviousData,

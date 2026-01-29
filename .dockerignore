@@ -1,0 +1,39 @@
+# dependencies
+**/node_modules/
+
+# testing
+**/coverage/
+
+# misc
+**/.DS_Store
+**/.vscode
+*.code-workspace
+**/*.md
+**/*.log
+**/*.pem
+**/LICENSE
+**/.gitignore
+**/vitest.config.ts
+.github
+.git
+.editorconfig
+msw/
+tests/
+biome.json
+
+# local env files
+**/.env*.local
+**/.env.sample
+
+# build artifacts
+**/*.tsbuildinfo
+**/build/
+**/dist
+**/dev-dist
+
+**/Dockerfile
+supabase/
+!supabase/database.d.ts
+**/storybook-static/
+**/chromatic.config.json
+**/.browserslistrc

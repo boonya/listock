@@ -4,9 +4,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "REVISION=${REVISION} vite build",
     "types": "tsc --noEmit",
-    "pretypes": "npm run build -w @listock/server",
+    "pretypes": "npm run types -w @listock/server",
     "test": "vitest --config ./vitest.config.ts"
   },
   "dependencies": {

@@ -1,28 +1,27 @@
 import * as Comlink from 'comlink';
-import {useCallback, useDeferredValue, useEffect, useMemo} from 'react';
+import {use, useCallback, useDeferredValue, useEffect} from 'react';
 import {
   getSession,
   isSessionExpired,
   useSession,
 } from '@/providers/auth/session';
 import type {SyncManager} from '@/providers/sync/worker';
-import SyncWorker from '@/providers/sync/worker?worker';
+import Worker from '@/providers/sync/worker?worker';
 import {notifyError} from '@/utils/notify';
 import {useOnlineStatus} from '@/utils/online-status';
 
-export const syncManagerWorker = new SyncWorker();
+const RemoteSyncManager = Comlink.wrap<typeof SyncManager>(new Worker());
+const promise = new RemoteSyncManager(API_URL);
 
 export default function SyncProvider() {
+  const syncManager = use(promise);
+
   const isOnline = useOnlineStatus();
   const [session] = useSession();
 
   const isSyncAllowed = useDeferredValue(
     isOnline && !isSessionExpired(session),
   );
-
-  const syncManager = useMemo(() => {
-    return Comlink.wrap<SyncManager>(syncManagerWorker);
-  }, []);
 
   const run = useCallback(async () => {
     try {

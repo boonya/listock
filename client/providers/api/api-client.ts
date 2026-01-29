@@ -12,9 +12,12 @@ import {logger} from '@/utils/logger';
 
 export type {ApiClient};
 
-export const getAPIClient = (session?: Session | null): ApiClient => {
+export const getAPIClient = (
+  url: string,
+  session?: Session | null,
+): ApiClient => {
   const link = new RPCLink({
-    url: API_URL,
+    url,
     headers: {
       authorization: getAuthorizationHeader(session),
       'x-api-client-name': pkg.name,
@@ -49,7 +52,7 @@ export const isResponseError = <TCode extends ORPCErrorCode, TData>(
 
 export function useApiClient(): ApiClient {
   const [session] = useSession();
-  return getAPIClient(session);
+  return getAPIClient(API_URL, session);
 }
 
 type Session = {

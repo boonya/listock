@@ -2,10 +2,19 @@
   "name": "@listock/server",
   "version": "1.0.0",
   "type": "module",
+  "main": "./index.ts",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "import": {
+      "types": "./build/index.d.mts",
+      "default": "./build/index.mjs"
+    }
+  },
   "scripts": {
     "dev": "tsx watch --clear-screen=false --env-file=.env.local ./index.ts",
-    "build": "tsc",
-    "types": "tsc --noEmit",
+    "build": "pkgroll --clean-dist --srcdist .:build --env.REVISION=${REVISION} --sourcemap",
+    "types": "tsc --outDir dist",
+    "pretypes": "rm -rf dist",
     "test": "vitest --config ./vitest.config.ts"
   },
   "dependencies": {
@@ -14,6 +23,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "pkgroll": "^2.22.0",
     "tsx": "^4.21.0"
   },
   "peerDependencies": {

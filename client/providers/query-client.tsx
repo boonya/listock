@@ -47,8 +47,7 @@ export const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       refetchInterval: false,
       // meta: {
-      //   // api: getAPIClient(),
-      //   api: 'getAPIClient()',
+      //   api: 'getAPIClient(API_URL)',
       // },
     },
     mutations: {

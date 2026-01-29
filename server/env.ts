@@ -11,5 +11,5 @@ const EnvsSchema = z.object({
 export type Envs = z.infer<typeof EnvsSchema>;
 
 export default function getEnvs() {
-  return EnvsSchema.parse(process.env);
+  return EnvsSchema.parse({...process.env, REVISION: process.env.REVISION});
 }

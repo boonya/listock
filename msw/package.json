@@ -2,5 +2,8 @@
   "name": "@listock/msw",
   "dependencies": {
     "msw": "^2.12.7"
+  },
+  "msw": {
+    "workerDirectory": ["msw/public"]
   }
 }

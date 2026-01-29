@@ -5,7 +5,7 @@ import {getAPIClient} from '@/providers/api/api-client';
 import {setSession} from '@/providers/auth/session';
 import {notifyError} from '@/utils/notify';
 
-const api = getAPIClient();
+const api = getAPIClient(API_URL);
 
 export default function SignIn() {
   const router = useRouter();

@@ -15,7 +15,6 @@ jobs:
       - run: npm ci
       - run: |
           REVISION=${{ github.sha }} \
-          API_URL=http://api-server \
           npm run build:client
 
   server:
