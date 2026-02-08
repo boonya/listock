@@ -11,6 +11,8 @@ coverage/
 
 # misc
 .DS_Store
+.vscode/
+.zed/
 
 # debug
 npm-debug.log*
