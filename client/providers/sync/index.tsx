@@ -11,10 +11,10 @@ import {notifyError} from '@/utils/notify';
 import {useOnlineStatus} from '@/utils/online-status';
 
 const RemoteSyncManager = Comlink.wrap<typeof SyncManager>(new Worker());
-const promise = new RemoteSyncManager(API_URL);
+const syncManagerPromise = new RemoteSyncManager(API_URL);
 
 export default function SyncProvider() {
-  const syncManager = use(promise);
+  const syncManager = use(syncManagerPromise);
 
   const isOnline = useOnlineStatus();
   const [session] = useSession();
