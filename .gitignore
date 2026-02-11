@@ -12,6 +12,7 @@ coverage/
 # misc
 .DS_Store
 .vscode/
+.cursor/
 .zed/
 
 # debug

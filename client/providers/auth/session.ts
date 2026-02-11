@@ -1,8 +1,6 @@
-import {keepPreviousData, queryOptions} from '@tanstack/react-query';
 import {useMemo} from 'react';
 import {useLocalStorage} from 'usehooks-ts';
 import {z} from 'zod';
-import {getAPIClient} from '@/providers/api/api-client';
 import {logger} from '@/utils/logger';
 
 const UserSchema = z.object({
@@ -128,22 +126,10 @@ export const removeSession = () => {
   }
 };
 
-export const isSessionExpired = (session: Session | null) => {
+export const isSessionExpired = (
+  session: {expires_at: number} | null | undefined,
+) => {
   const expires_at = session?.expires_at;
   if (!expires_at) return true;
   return new Date(expires_at * 1000) < new Date();
-};
-
-export const queryRefreshSession = (session: Session) => {
-  return queryOptions({
-    queryKey: ['refresh-session'],
-    queryFn: async () => {
-      const api = getAPIClient(API_URL, session);
-      return api.user.refresh_session(session);
-    },
-    placeholderData: keepPreviousData,
-    initialData: session,
-    staleTime: session.ttl * 1000,
-    initialDataUpdatedAt: session.issued_at * 1000,
-  });
 };

@@ -1,9 +1,14 @@
 import {asyncThrottle} from '@tanstack/react-pacer';
 import * as Comlink from 'comlink';
 import {liveQuery, type Subscription} from 'dexie';
-import {type ApiClient, getAPIClient} from '@/providers/api/api-client';
+import {type ApiClient, getAPIClient} from '@/providers/api-client';
 import {getDBInstance, type List} from '@/providers/storage/data-db';
 import {logger} from '@/utils/logger';
+
+type Session = {
+  access_token: string;
+  token_type: string;
+};
 
 export class SyncManager {
   private db;
@@ -19,8 +24,8 @@ export class SyncManager {
     logger.debug(['worker', 'init', 'sync'], 'Sync manager has initialized.');
   }
 
-  public async run(session: {access_token: string; token_type?: string}) {
-    logger.debug(['worker', 'sync'], 'Run sync.', this);
+  public async start(session: Session) {
+    logger.debug(['worker', 'sync'], 'Start sync.', this);
 
     const api = getAPIClient(this.API_URL, session);
 
@@ -29,8 +34,8 @@ export class SyncManager {
     logger.debug(['worker', 'sync'], 'Sync started.', this);
   }
 
-  public async suppress() {
-    logger.debug(['worker', 'sync'], 'Suppress sync.', this);
+  public async stop() {
+    logger.debug(['worker', 'sync'], 'Stop sync.', this);
 
     if (this.subscriptions) {
       await Promise.all(
@@ -38,7 +43,7 @@ export class SyncManager {
       );
     }
 
-    logger.debug(['worker', 'sync'], 'Sync suppressed.', this);
+    logger.debug(['worker', 'sync'], 'Sync stopped.', this);
   }
 
   private is_running(value: boolean) {

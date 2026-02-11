@@ -6,6 +6,7 @@ import AppHeader from '@/components/app-header';
 import GeneralErrorMessage from '@/components/errors/general-message';
 import Progressbar from '@/components/progressbar';
 import {QueryClientProvider} from '@/providers/query-client';
+import SyncProvider from '@/providers/sync';
 import TanStackDevtools from '@/providers/tanstack-devtools';
 
 function RootLayout() {
@@ -17,6 +18,7 @@ function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AppHeader />
           <Outlet />
+          <SyncProvider />
           <TanStackDevtools />
         </QueryClientProvider>
       </Suspense>

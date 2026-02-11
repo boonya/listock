@@ -1,7 +1,7 @@
 import {createRoute, redirect, useRouter} from '@tanstack/react-router';
 import {useCallback} from 'react';
 import z from 'zod';
-import {useApiClient} from '@/providers/api/api-client';
+import {useApiClient} from '@/providers/api-client';
 import {getSession, removeSession} from '@/providers/auth/session';
 import rootRoute from '@/providers/router/root.route';
 import SignIn from './sign-in';

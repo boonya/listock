@@ -5,7 +5,7 @@ import {
   PersistQueryClientProvider,
 } from '@tanstack/react-query-persist-client';
 import type {PropsWithChildren} from 'react';
-import {isResponseError} from '@/providers/api/api-client';
+import {isResponseError} from '@/providers/api-client';
 
 const storageKey = 'REACT_QUERY_OFFLINE_CACHE';
 const storage: AsyncStorage = window.localStorage;
@@ -68,7 +68,10 @@ export function QueryClientProvider({
 //   api: ApiClient;
 // }
 
-type QueryKey = ['refresh-session' | 'me' | 'listing', ...(readonly unknown[])];
+type QueryKey = [
+  'ping' | 'me' | 'refresh-session' | 'listing',
+  ...(readonly unknown[]),
+];
 
 declare module '@tanstack/react-query' {
   interface Register {

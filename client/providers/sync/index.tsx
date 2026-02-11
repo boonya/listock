@@ -1,53 +1,67 @@
+import {useQueryClient} from '@tanstack/react-query';
 import * as Comlink from 'comlink';
 import {use, useCallback, useDeferredValue, useEffect} from 'react';
+import {queryMe} from '@/providers/api/me';
+import {queryRefreshSession} from '@/providers/api/session';
 import {
-  getSession,
   isSessionExpired,
+  type Session,
+  setSession,
   useSession,
 } from '@/providers/auth/session';
 import type {SyncManager} from '@/providers/sync/worker';
 import Worker from '@/providers/sync/worker?worker';
 import {notifyError} from '@/utils/notify';
 import {useOnlineStatus} from '@/utils/online-status';
+import {useServerStatus} from '@/utils/server-status';
 
 const RemoteSyncManager = Comlink.wrap<typeof SyncManager>(new Worker());
-const syncManagerPromise = new RemoteSyncManager(API_URL);
+const syncManager = new RemoteSyncManager(API_URL);
 
 export default function SyncProvider() {
-  const syncManager = use(syncManagerPromise);
+  const sync = use(syncManager);
 
-  const isOnline = useOnlineStatus();
+  const queryClient = useQueryClient();
   const [session] = useSession();
+  const isClientOnline = useOnlineStatus();
+  const isServerAvailable = useServerStatus();
 
-  const isSyncAllowed = useDeferredValue(
-    isOnline && !isSessionExpired(session),
+  const isSyncable = useDeferredValue(
+    isClientOnline && isServerAvailable && !!session,
   );
 
-  const run = useCallback(async () => {
-    try {
-      const session = getSession();
-      if (!session) throw new Error('No session.');
-      await syncManager.run(session);
-    } catch (error) {
-      notifyError(['worker', 'sync'], error, 'Помилка воркера синхронізації.');
-    }
-  }, [syncManager]);
+  const getLatestSession = useCallback(
+    async (session: Session) => {
+      if (!isSessionExpired(session)) {
+        await queryClient.fetchQuery(queryMe(session));
+        return session;
+      }
 
-  const suppress = useCallback(async () => {
+      const new_session = await queryClient.fetchQuery(
+        queryRefreshSession(session),
+      );
+      setSession(new_session);
+      return new_session;
+    },
+    [queryClient],
+  );
+
+  const init = useCallback(async () => {
     try {
-      await syncManager.suppress();
+      if (isSyncable && !!session) {
+        const latest_session = await getLatestSession(session);
+        await sync.start(latest_session);
+      } else {
+        await sync.stop();
+      }
     } catch (error) {
-      notifyError(['worker', 'sync'], error, 'Помилка воркера синхронізації.');
+      notifyError(['worker', 'sync'], error, 'Помилка синхронізації.');
     }
-  }, [syncManager]);
+  }, [isSyncable, session, sync, getLatestSession]);
 
   useEffect(() => {
-    if (isSyncAllowed) {
-      void run();
-    } else {
-      void suppress();
-    }
-  }, [isSyncAllowed, run, suppress]);
+    void init();
+  }, [init]);
 
   return null;
 }

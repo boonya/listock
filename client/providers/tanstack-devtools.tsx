@@ -4,6 +4,7 @@ import {ReactQueryDevtoolsPanel} from '@tanstack/react-query-devtools';
 import {TanStackRouterDevtoolsPanel} from '@tanstack/react-router-devtools';
 import {useEffect} from 'react';
 import {useSessionStorage} from 'usehooks-ts';
+import {logger} from '@/utils/logger';
 
 declare global {
   interface Window {
@@ -18,7 +19,14 @@ export default function DevTools() {
     // TODO: Take a look at this one and decide how to deal with.
     // eslint-disable-next-line unicorn/prefer-global-this
     window.__TANSTACK_DEVTOOLS_TOGGLE = () => {
-      setShow((v) => !v);
+      setShow((prev) => {
+        const value = !prev;
+        logger.info(
+          [],
+          `TanStackDevtools are ${value ? 'enabled' : 'disabled'}`,
+        );
+        return value;
+      });
     };
   }, [setShow]);
 
