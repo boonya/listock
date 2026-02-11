@@ -1,5 +1,5 @@
 import {keepPreviousData, queryOptions} from '@tanstack/react-query';
-import {getAPIClient} from '@/providers/api/api-client';
+import {getAPIClient} from '@/providers/api-client';
 import type {Session} from '@/providers/auth/session';
 
 export const queryMe = (session: Session) =>

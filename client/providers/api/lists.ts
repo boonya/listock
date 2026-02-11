@@ -1,5 +1,5 @@
 import {queryOptions} from '@tanstack/react-query';
-import {getAPIClient} from '@/providers/api/api-client';
+import {getAPIClient} from '@/providers/api-client';
 import {getSession} from '@/providers/auth/session';
 
 export const queryListing = () =>

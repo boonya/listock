@@ -7,8 +7,8 @@ import rootRoute from '@/providers/router/root.route';
 export const root = createRoute({
   path: '/lists',
   getParentRoute: () => rootRoute,
-  beforeLoad: async ({context, location}) => {
-    await authOnlyRoute(context.queryClient, location.href);
+  beforeLoad: async ({location}) => {
+    await authOnlyRoute(location.href);
   },
 });
 

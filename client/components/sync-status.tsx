@@ -1,5 +1,6 @@
 import {Box, CircularProgress, styled, Tooltip} from '@mui/material';
 import {useOnlineStatus} from '@/utils/online-status';
+import {useServerStatus} from '@/utils/server-status';
 import {useSyncStatus} from '@/utils/sync-status';
 
 const Container = styled(Box)(() => ({
@@ -23,11 +24,17 @@ const Dot = styled(Box, {
 }));
 
 export default function SyncStatusIndicator() {
+  const isClientOnline = useOnlineStatus();
+  const isServerAvailable = useServerStatus();
   const isSyncing = useSyncStatus();
-  const isOnline = useOnlineStatus();
 
-  const title = isOnline ? 'Online' : 'Offline';
-  const color = isOnline ? 'green' : 'red';
+  const title = !isClientOnline
+    ? 'Offline'
+    : isServerAvailable
+      ? 'Online'
+      : 'Server in not available';
+
+  const color = isClientOnline && isServerAvailable ? 'green' : 'red';
 
   return (
     <Tooltip title={title}>

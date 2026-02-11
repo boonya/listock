@@ -5,7 +5,7 @@ import {
   PersistQueryClientProvider,
 } from '@tanstack/react-query-persist-client';
 import type {PropsWithChildren} from 'react';
-import {isResponseError} from '@/providers/api/api-client';
+import {isResponseError} from '@/providers/api-client';
 
 const storageKey = 'REACT_QUERY_OFFLINE_CACHE';
 const storage: AsyncStorage = window.localStorage;
@@ -20,9 +20,9 @@ const persister = createAsyncStoragePersister({
 });
 
 /**
- * Create query retry policy.
+ * Create retry query policy.
  *
- * There is not reason to retry if error is not a RestApiResponseError
+ * There is not reason to retry if an error is not related to a Response
  * or response status is less than 500.
  *
  * Otherwise it will retry up to 3 times before it fails.
@@ -30,9 +30,6 @@ const persister = createAsyncStoragePersister({
 export const queryRetryPolicy =
   (retries = 3) =>
   (failureCount: number, error: Error) => {
-    // if (!(error instanceof RestApiResponseError)) {
-    //   return false;
-    // }
     if (isResponseError(error) && error.status < 500) {
       return false;
     }
@@ -71,7 +68,10 @@ export function QueryClientProvider({
 //   api: ApiClient;
 // }
 
-type QueryKey = ['refresh-session' | 'me' | 'listing', ...(readonly unknown[])];
+type QueryKey = [
+  'ping' | 'me' | 'refresh-session' | 'listing',
+  ...(readonly unknown[]),
+];
 
 declare module '@tanstack/react-query' {
   interface Register {

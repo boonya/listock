@@ -1,7 +1,7 @@
 import {Button, Stack, TextField} from '@mui/material';
 import {useRouter} from '@tanstack/react-router';
 import {toast} from 'sonner';
-import {getAPIClient} from '@/providers/api/api-client';
+import {getAPIClient} from '@/providers/api-client';
 import {setSession} from '@/providers/auth/session';
 import {notifyError} from '@/utils/notify';
 
