@@ -17,7 +17,7 @@
     "@mui/icons-material": "^7.3.7",
     "@mui/lab": "7.0.1-beta.21",
     "@mui/material": "^7.3.7",
-    "@orpc/client": "^1.13.4",
+    "@orpc/client": "^1.13.6",
     "@orpc/tanstack-query": "^1.13.4",
     "@tanstack/query-async-storage-persister": "^5.90.21",
     "@tanstack/react-pacer": "^0.19.3",
